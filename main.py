@@ -379,9 +379,10 @@ async def get_analysis(fixture_id: int):
 
 
 # Serve frontend
-if os.path.exists("frontend/dist"):
-    app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="frontend")
-elif os.path.exists("index.html"):
-    @app.get("/")
-    async def root():
-        return FileResponse("index.html")
+@app.get("/")
+async def root():
+    # Tenta vários caminhos possíveis
+    for path in ["index.html", "/app/index.html", "frontend/dist/index.html"]:
+        if os.path.exists(path):
+            return FileResponse(path)
+    return {"status": "SeuTipster API running", "docs": "/docs"}
