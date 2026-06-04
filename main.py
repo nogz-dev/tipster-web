@@ -11,7 +11,7 @@ from anthropic import Anthropic
 import json
 import pytz
 
-app = FastAPI()
+app = FastAPI(title="SeuTipster API", version="1.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -98,7 +98,11 @@ Escolha apenas os mercados com maior base estatística."""
 
 
 async def football_request(endpoint: str, params: dict) -> dict:
-    headers = {"x-apisports-key": FOOTBALL_API_KEY}
+    headers = {
+        "x-apisports-key": FOOTBALL_API_KEY,
+        "x-rapidapi-key": FOOTBALL_API_KEY,
+        "x-rapidapi-host": "v3.football.api-sports.io"
+    }
     async with httpx.AsyncClient(timeout=20) as client:
         r = await client.get(f"{FOOTBALL_API_URL}/{endpoint}", headers=headers, params=params)
         r.raise_for_status()
@@ -159,7 +163,7 @@ def translate_league(name: str) -> str:
 async def get_today():
     tz = pytz.timezone(TIMEZONE)
     today = date.today().isoformat()
-    data = await football_request("fixtures", {"date": today, "timezone": TIMEZONE})
+    data = await football_request("fixtures", {"date": today, "timezone": TIMEZONE, "status": "NS-1H-HT-2H-ET-BT-P-SUSP-INT-PST-CANC-ABD-AWD-WO-LIVE-FT"})
     fixtures = data.get("response", [])
     result = []
     for f in fixtures:
